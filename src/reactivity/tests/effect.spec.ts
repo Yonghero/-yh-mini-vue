@@ -79,12 +79,15 @@ describe("effect", () => {
     expect(dummy).toBe(1)
     stop(runner)
 
-    obj.foo = 3
+    // obj.foo = 3
+    // set       get
+    // obj.foo = obj.foo + 1
+    obj.foo++
     expect(dummy).toBe(1)
 
     runner()
 
-    expect(dummy).toBe(3)
+    expect(dummy).toBe(2)
     
   })
 

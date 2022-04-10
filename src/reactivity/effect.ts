@@ -1,4 +1,6 @@
 import { extend } from "../shared"
+let activeEffect
+let shouldTrack
 
 class ReactiveEffect {
 
@@ -12,8 +14,18 @@ class ReactiveEffect {
   }
 
   run(){
+    if(!this.active) {
+      return this._fn()
+    }
+
+    shouldTrack = true
     activeEffect = this
-    return this._fn()
+
+    const result = this._fn()
+    
+    shouldTrack = false
+
+    return result
   }
 
   stop() {
@@ -31,9 +43,9 @@ function cleanupEffect(effect) {
   effect.deps.forEach((dep:any) => {
     dep.delete(effect)
   })
+  effect.deps.length = 0
 }
 
-let activeEffect
 const targetMap = new Map()
 
 export function track(target, key) {
@@ -55,6 +67,9 @@ export function track(target, key) {
   // 仅仅是get值 而不是在effect函数里收集的
   if(!activeEffect) return
 
+  // 被stop的effect 不需要再次收集
+  if(!shouldTrack) return
+
   dep.add(activeEffect)
   activeEffect.deps.push(dep)
 }
@@ -71,8 +86,6 @@ export function trigger(target, key) {
     }
   }
 }
-
-
 
 
 export function effect(fn, options:any = {}) {
