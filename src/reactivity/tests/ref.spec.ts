@@ -54,7 +54,7 @@ describe('ref', () => {
     expect(unRef(a)).toBe(1)
   })
 
-  it('proxyRefs', () => {
+  it('proxyRefs usually use in template', () => {
     const user = {
       age: ref(10),
       name: 'bbj'
