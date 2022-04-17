@@ -1,5 +1,5 @@
 import { effect } from '../effect'
-import { ref } from '../ref'
+import { isRef, proxyRefs, ref, unRef } from '../ref'
 
 describe('ref', () => {
   it('happy path', () => {
@@ -7,7 +7,6 @@ describe('ref', () => {
 
     expect(number.value).toBe(1)
   })
-
 
   it('ref effect', () => {
     const number = ref(1)
@@ -33,7 +32,6 @@ describe('ref', () => {
     expect(calls).toBe(2)
   })
 
-
   it('ref nested object', () => {
     const refObj = ref({count: 1})
     let dummy
@@ -47,4 +45,34 @@ describe('ref', () => {
     expect(dummy).toBe(2)
   })
   
+  it('isRef unRef', () => {
+    const a = ref(1)
+
+    expect(isRef(a)).toBe(true)
+    expect(isRef(1)).toBe(false)
+
+    expect(unRef(a)).toBe(1)
+  })
+
+  it('proxyRefs', () => {
+    const user = {
+      age: ref(10),
+      name: 'bbj'
+    }
+
+    const proxyUser = proxyRefs(user)
+
+    expect(proxyUser.age).toBe(10)
+    expect(user.age.value).toBe(10)
+
+    proxyUser.age = 20
+
+    expect(proxyUser.age).toBe(20)
+    expect(user.age.value).toBe(20)
+
+    proxyUser.age = ref(15)
+
+    expect(proxyUser.age).toBe(15)
+    expect(user.age.value).toBe(15)
+  })
 })
