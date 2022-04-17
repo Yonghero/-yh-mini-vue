@@ -49,7 +49,7 @@ function cleanupEffect(effect) {
 const targetMap = new Map()
 
 export function track(target, key) {
-
+  // target -> key -> dep
   let depsMap = targetMap.get(target)
 
   if(!depsMap) {
@@ -64,10 +64,14 @@ export function track(target, key) {
     depsMap.set(key, dep)
   }
 
+  trackEffect(dep)
+}
+
+
+export function trackEffect(dep) {
   // 仅仅是get值 而不是在effect函数里收集的
   if(!activeEffect) return
 
-  // 被stop的effect 不需要再次收集
   if(!shouldTrack) return
 
   dep.add(activeEffect)
@@ -78,6 +82,10 @@ export function trigger(target, key) {
   const depsMap = targetMap.get(target)
   const deps = depsMap.get(key)
 
+  triggerEffect(deps)
+}
+
+export function triggerEffect(deps) {
   for (const dep of deps) {
     if(dep.scheduler) {
       dep.scheduler()
@@ -87,6 +95,9 @@ export function trigger(target, key) {
   }
 }
 
+export function isTracking() {
+  return shouldTrack && activeEffect !== undefined
+}
 
 export function effect(fn, options:any = {}) {
 
